@@ -55,9 +55,16 @@ local function inputItem(tool, slotIndex, itemType)
     print("📤 Sent InputItem for:", tool.Name)
 end
 
--- Fire SetRecipe
+-- Fire SetRecipe (updated as per your request)
 local function setRecipe(recipeName)
-    craftingRemote:FireServer("SetRecipe", craftingEvent, "GearEventWorkbench", recipeName)
+    local args = {
+        [1] = "SetRecipe",
+        [2] = workspace.NewCrafting.EventCraftingWorkBench,
+        [3] = "GearEventWorkbench",
+        [4] = recipeName
+    }
+
+    craftingRemote:FireServer(unpack(args))
     print("🧪 Recipe set:", recipeName)
 end
 
