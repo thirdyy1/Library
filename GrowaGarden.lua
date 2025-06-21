@@ -15,23 +15,24 @@ local craftingEvent = workspace:WaitForChild("Interaction"):WaitForChild("Update
 local function equipTool(pattern)
     for _, tool in ipairs(backpack:GetChildren()) do
         if tool:IsA("Tool") and tool.Name:match(pattern) then
-            tool.Parent = character
-            print("✅ Equipped:", tool.Name)
-            return tool
+            -- Check if the tool is already equipped
+            if not tool.Parent == character then
+                tool.Parent = character
+                print("✅ Equipped:", tool.Name)
+                return tool
+            else
+                print("❌ Tool already equipped:", tool.Name)
+                return tool
+            end
         end
     end
     warn("❌ Tool not found:", pattern)
     return nil
 end
 
--- Get UUID from attribute "c"
-local function getUUID(tool)
-    return tool:GetAttribute("c")
-end
-
 -- Fire InputItem for a tool
 local function inputItem(tool, slotIndex, itemType)
-    local uuid = getUUID(tool)
+    local uuid = tool:GetAttribute("c")
     if not uuid then
         warn("❌ UUID missing for:", tool.Name)
         return
