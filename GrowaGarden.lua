@@ -6,7 +6,6 @@ local backpack = player:WaitForChild("Backpack")
 local character = player.Character or player.CharacterAdded:Wait()
 
 local craftingRemote = ReplicatedStorage.GameEvents.CraftingGlobalObjectService
-local craftingEvent = workspace.Interaction.UpdateItems.NewCrafting.EventCraftingWorkBench
 
 -- Equip tool from backpack by name pattern
 local function equipTool(pattern)
