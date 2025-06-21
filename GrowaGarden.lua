@@ -1,11 +1,15 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local workspace = game:GetService("Workspace")
 
 local player = Players.LocalPlayer
 local backpack = player:WaitForChild("Backpack")
 local character = player.Character or player.CharacterAdded:Wait()
 
 local craftingRemote = ReplicatedStorage.GameEvents.CraftingGlobalObjectService
+
+-- Define craftingEvent (fix this path to match your game structure)
+local craftingEvent = workspace:WaitForChild("Interaction"):WaitForChild("UpdateItems"):WaitForChild("NewCrafting"):WaitForChild("EventCraftingWorkBench")
 
 -- Equip tool from backpack by name pattern
 local function equipTool(pattern)
@@ -81,9 +85,11 @@ local function autoCraft()
     if not cacao then return end
     wait(0.4)
 
+    -- Set recipe
     setRecipe("Mutation Spray Choc")
     wait(0.4)
 
+    -- Input the Cacao item
     inputItem(cacao, 2, "Holdable") -- Cacao goes into slot 2
     wait(0.4)
 
@@ -92,15 +98,17 @@ local function autoCraft()
     if not spray then return end
     wait(0.4)
 
+    -- Input the Cleaning Spray item
     inputItem(spray, 1, "SprayBottle") -- Spray goes into slot 1
     wait(0.4)
 
+    -- Start crafting
     craftItem()
 
-    -- Wait for crafting to finish (8 minutes = 480 seconds)
-    wait(480) -- Wait for 8 minutes
+    -- Wait for crafting to finish (12 minutes and 5 seconds = 725 seconds)
+    wait(725) -- Wait for 12 minutes and 5 seconds
 
-    -- Claim after crafting finishes
+    -- Claim the crafted item after the specified time
     claimItem()
 end
 
