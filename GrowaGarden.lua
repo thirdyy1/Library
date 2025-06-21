@@ -8,8 +8,7 @@ local character = player.Character or player.CharacterAdded:Wait()
 local craftingRemote = ReplicatedStorage.GameEvents.CraftingGlobalObjectService
 local craftingEvent = workspace.Interaction.UpdateItems.NewCrafting.EventCraftingWorkBench
 
-local CRAFT_WAIT_TIME = 3 -- seconds to wait for crafting to finish (adjust if needed)
-
+-- Equip tool from backpack by name pattern
 local function equipTool(pattern)
     for _, tool in ipairs(backpack:GetChildren()) do
         if tool:IsA("Tool") and tool.Name:match(pattern) then
@@ -22,15 +21,17 @@ local function equipTool(pattern)
     return nil
 end
 
+-- Get UUID from attribute "c"
 local function getUUID(tool)
     return tool:GetAttribute("c")
 end
 
+-- Fire InputItem for a tool
 local function inputItem(tool, slotIndex, itemType)
     local uuid = getUUID(tool)
     if not uuid then
         warn("❌ UUID missing for:", tool.Name)
-        return false
+        return
     end
 
     local args = {
@@ -48,87 +49,57 @@ local function inputItem(tool, slotIndex, itemType)
 
     craftingRemote:FireServer(unpack(args))
     print("📤 Sent InputItem for:", tool.Name)
-    return true
 end
 
+-- Fire SetRecipe
 local function setRecipe(recipeName)
     craftingRemote:FireServer("SetRecipe", craftingEvent, "GearEventWorkbench", recipeName)
     print("🧪 Recipe set:", recipeName)
 end
 
+-- Fire Craft
 local function craftItem()
     craftingRemote:FireServer("Craft", craftingEvent, "GearEventWorkbench")
     print("🛠️ Crafting started...")
 end
 
+-- Fire Claim
 local function claimItem()
     local args = {
         "Claim",
         craftingEvent,
         "GearEventWorkbench",
-        1
+        1 -- slot 1: crafted output
     }
     craftingRemote:FireServer(unpack(args))
     print("🎁 Claimed crafted item!")
 end
 
-local function countSeedPacks()
-    local count = 0
-    for _, item in ipairs(backpack:GetChildren()) do
-        if item.Name == "Crafters Seed Pack" then
-            count = count + 1
-        end
-    end
-    return count
+-- Full sequence
+local function autoCraft()
+    -- Equip Cacao
+    local cacao = equipTool("^Cacao")
+    if not cacao then return end
+    wait(0.4)
+
+    setRecipe("Mutation Spray Choc")
+    wait(0.4)
+
+    inputItem(cacao, 2, "Holdable") -- Cacao goes into slot 2
+    wait(0.4)
+
+    -- Equip Cleaning Spray
+    local spray = equipTool("^Cleaning Spray")
+    if not spray then return end
+    wait(0.4)
+
+    inputItem(spray, 1, "SprayBottle") -- Spray goes into slot 1
+    wait(0.4)
+
+    craftItem()
+    wait(485)
+
+    claimItem()
 end
 
-local function waitForNewSeedPack(oldCount)
-    print("⏳ Waiting for new 'Crafters Seed Pack'...")
-    while true do
-        local currentCount = countSeedPacks()
-        if currentCount > oldCount then
-            print("✅ New 'Crafters Seed Pack' detected!")
-            break
-        end
-        wait(1) -- check every second, adjust if needed
-    end
-end
-
-local function autoCraftLoop()
-    local lastSeedPackCount = countSeedPacks()
-
-    while true do
-        print("🔄 Starting new craft cycle")
-
-        -- Equip Cacao
-        local cacao = equipTool("^Cacao")
-        if not cacao then return end
-        wait(0.4)
-
-        setRecipe("Mutation Spray Choc")
-        wait(0.4)
-
-        if not inputItem(cacao, 2, "Holdable") then return end
-        wait(0.4)
-
-        -- Equip Cleaning Spray
-        local spray = equipTool("^Cleaning Spray")
-        if not spray then return end
-        wait(0.4)
-
-        if not inputItem(spray, 1, "SprayBottle") then return end
-        wait(0.4)
-
-        craftItem()
-        wait(CRAFT_WAIT_TIME)
-
-        claimItem()
-        wait(0.4)
-
-        -- Wait for new "Crafters Seed Pack" before next cycle
-        waitForNewSeedPack(lastSeedPackCount)
-        lastSeedPackCount = countSeedPacks()
-    end
-end
-
-autoCraftLoop()
+autoCraft()
