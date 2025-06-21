@@ -97,8 +97,11 @@ local function autoCraft()
     wait(0.4)
 
     craftItem()
-    wait(485)
 
+    -- Wait for crafting to finish (8 minutes = 480 seconds)
+    wait(480) -- Wait for 8 minutes
+
+    -- Claim after crafting finishes
     claimItem()
 end
 
