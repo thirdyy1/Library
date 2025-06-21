@@ -54,6 +54,18 @@ local function inputItem(tool, slotIndex, itemType)
     print("📤 InputItem sent for", tool.Name)
 end
 
+-- Auto claim crafted item
+local function autoClaim()
+    local args = {
+        "Claim",
+        craftingEvent,
+        "GearEventWorkbench",
+        1
+    }
+    craftingRemote:FireServer(unpack(args))
+    print("🎁 Claimed crafted item!")
+end
+
 -- Main sequence
 local function autoCraft()
     -- Equip and input Cacao
@@ -79,6 +91,10 @@ local function autoCraft()
     -- Craft
     craftingRemote:FireServer("Craft", craftingEvent, "GearEventWorkbench")
     print("🎉 Crafting Complete!")
+    wait(1)
+
+    -- Claim
+    autoClaim()
 end
 
 autoCraft()
