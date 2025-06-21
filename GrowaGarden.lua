@@ -66,35 +66,47 @@ local function autoClaim()
     print("🎁 Claimed crafted item!")
 end
 
--- Main sequence
-local function autoCraft()
-    -- Equip and input Cacao
-    local cacaoTool = equipTool("^Cacao")
-    if not cacaoTool then return end
-    wait(0.5)
-
+-- Main crafting process
+local function autoCraft(cacaoTool, sprayTool)
+    wait(0.2)
     craftingRemote:FireServer("SetRecipe", craftingEvent, "GearEventWorkbench", "Mutation Spray Choc")
     print("🧪 SetRecipe: Mutation Spray Choc")
-    wait(0.5)
+    wait(0.2)
 
-    inputItem(cacaoTool, 2, "Holdable") -- Slot 2 for Cacao
-    wait(0.5)
+    inputItem(sprayTool, 1, "SprayBottle")
+    wait(0.2)
 
-    -- Equip and input Cleaning Spray
-    local sprayTool = equipTool("^Cleaning Spray")
-    if not sprayTool then return end
-    wait(0.5)
+    inputItem(cacaoTool, 2, "Holdable")
+    wait(0.2)
 
-    inputItem(sprayTool, 1, "SprayBottle") -- Slot 1 for Cleaning Spray
-    wait(0.5)
-
-    -- Craft
     craftingRemote:FireServer("Craft", craftingEvent, "GearEventWorkbench")
-    print("🎉 Crafting Complete!")
+    print("⚙️ Crafting in progress...")
     wait(1)
 
-    -- Claim
     autoClaim()
+    print("✅ Crafting cycle complete!\n")
 end
 
-autoCraft()
+-- Loop crafting until tools run out
+local function autoCraftLoop()
+    while true do
+        -- Try to equip tools
+        local cacaoTool = equipTool("^Cacao")
+        local sprayTool = equipTool("^Cleaning Spray")
+
+        -- Break loop if any tool is missing
+        if not cacaoTool or not sprayTool then
+            warn("❌ Out of tools. Auto-crafting stopped.")
+            break
+        end
+
+        -- Craft with current tools
+        autoCraft(cacaoTool, sprayTool)
+
+        -- Small pause before next cycle
+        wait(0.5)
+    end
+end
+
+-- Start the loop
+autoCraftLoop()
